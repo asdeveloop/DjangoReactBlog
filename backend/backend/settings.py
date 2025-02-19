@@ -197,8 +197,8 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Modern Marketplace ",
     # "site_icon": "images/favicon.ico",
     # "site_logo": "images/logos/logo.jpg",
-    "welcome_sign": "Welcome To Desphixs",
-    "copyright": "Desphixs",
+    "welcome_sign": "Welcome To Blog",
+    "copyright": "Alireza Safaei",
     "user_avatar": "images/photos/logo.jpg",
     "topmenu_links": [
         {"name": "Dashboard", "url": "home", "permissions": ["auth.view_user"]},
