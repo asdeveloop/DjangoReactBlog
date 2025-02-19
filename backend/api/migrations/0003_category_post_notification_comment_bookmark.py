@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('image', models.FileField(blank=True, null=True, upload_to='image')),
                 ('state', models.CharField(choices=[('Active', 'Active'), ('Draft', 'Draft'), ('Disable', 'Disable')], default='Active', max_length=100)),
                 ('view', models.IntegerField(default=0)),
-                ('sluq', models.SlugField(blank=True, null=True, unique=True)),
+                ('slug', models.SlugField(blank=True, null=True, unique=True)),
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('Category', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='api.category')),
                 ('likes', models.ManyToManyField(blank=True, related_name='likes_user', to=settings.AUTH_USER_MODEL)),

@@ -60,46 +60,47 @@ post_save.connect(create_user_profile, sender=User)
 post_save.connect(save_user_profile, sender=User)
 
 
+
 class Category(models.Model):
     title = models.CharField(max_length=100)
-    image = models.FileField(upload_to="image", blank=True, null=True)
-    slug = models.SlugField(unique=True, blank=True, null=True)
+    image = models.FileField(upload_to="image", null=True, blank=True)
+    slug = models.SlugField(unique=True, null=True, blank=True)
 
     def __str__(self):
         return self.title
     
-    #class Meta:
-        ordering = ['-date']
+    class Meta:
         verbose_name_plural = "Category"
 
     def save(self, *args, **kwargs):
         if self.slug == "" or self.slug == None:
             self.slug = slugify(self.title)
         super(Category, self).save(*args, **kwargs)
-
+    
     def post_count(self):
-        return Post.objects.filter(Category=self).count()
+        return Post.objects.filter(category=self).count()
 
 class Post(models.Model):
-
-    STATUS = (
-        ('Active', 'Active'),
-        ('Draft', 'Draft'),
-        ('Disable', 'Disable'),
-    )   
+    
+    STATUS = ( 
+        ("Active", "Active"), 
+        ("Draft", "Draft"),
+        ("Disabled", "Disabled"),
+    )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, blank=True)
-    Category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=100)
+    image = models.FileField(upload_to="image", null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    image = models.FileField(upload_to="image", blank=True, null=True)
-    state = models.CharField(max_length=100, choices=STATUS, default='Active')
+    tags = models.CharField(max_length=100, default="")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='posts')
+    status = models.CharField(max_length=100, choices=STATUS, default="Active")
     view = models.IntegerField(default=0)
-    likes = models.ManyToManyField(User, related_name='likes_user', blank=True)
-    sluq = models.SlugField(unique=True, blank=True, null=True)
+    likes = models.ManyToManyField(User, blank=True, related_name="likes_user")
+    slug = models.SlugField(unique=True, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
-
+    
     def __str__(self):
         return self.title
     
@@ -108,9 +109,12 @@ class Post(models.Model):
         verbose_name_plural = "Post"
 
     def save(self, *args, **kwargs):
-        if self.sluq == "" or self.sluq == None:
-            self.sluq = slugify(self.title) + "-" + shortuuid.uuid()[:2]
+        if self.slug == "" or self.slug == None:
+            self.slug = slugify(self.title) + "-" + shortuuid.uuid()[:2]
         super(Post, self).save(*args, **kwargs)
+    
+    def comments(self):
+        return Comment.objects.filter(post=self).order_by("-id")
 
 
 class Comment(models.Model):
