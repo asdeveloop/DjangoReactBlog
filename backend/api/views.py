@@ -33,10 +33,12 @@ from api import models as api_models
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = api_serializer.MyTokenObtainPairSerializer
 
+
 class RegisterView(generics.CreateAPIView):
     queryset = api_models.User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = api_serializer.RegisterSerializer
+
 
 class ProfileView(generics.RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
@@ -219,3 +221,88 @@ class DashboardStats(generics.ListAPIView):
             return queryset
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
+
+class DashboardPostList(generics.ListAPIView):
+    serializer_class = api_serializer.PostSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user = api_models.User.objects.get(id=user_id)
+        return api_models.Post.objects.filter(user=user).order_by('-id')
+    
+
+class DashboardCommentList(generics.ListAPIView):
+    serializer_class = api_serializer.CommentSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user = api_models.User.objects.get(id=user_id)
+        return api_models.Comment.objects.filter(post_user=user)
+    
+
+class DashboardNotificationList(generics.ListAPIView):
+    serializer_class = api_serializer.NotificationSerializer
+    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        user = api_models.User.objects.get(id=user_id)
+        return api_models.Notification.objects.all(seen=False, user=user)
+    
+
+class DashboardMarkNotificationAsSeen(APIView):
+    def post(self, request):
+        noti_id = request.data['noti_id']
+        noti = api_models.Notification.objects.get(id=noti_id)
+
+        noti.seen = True
+        noti.save()
+
+        return Response({"message": "Notification Marked as Seen"}, status=status.HTTP_200_OK)
+    
+
+class DashboardReplyCommentAPIView(APIView):
+
+    def post(self, request):
+        comment_id = request.data['comment_id']
+        reply  = request.data['reply']
+
+        comment = api_models.Comment.objects.get(id=comment_id)
+        comment.reply = reply
+        comment.save()
+
+        return Response({"message": "Comment Response Sent"}, status=status.HTTP_201_CREATED)
+    
+
+class DashboardPostCreateAPIView(generics.CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = api_serializer.PostSerializer
+    
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+
+        user_id = request.data.get('user_id')
+        title = request.data.get('title')
+        image = request.data.get('image')
+        description = request.data.get('description')
+        tags = request.data.get('tags')
+        category_id = request.data.get('category')
+        post_status = request.data.get('status')
+
+        user = api_models.User.objects.get(id=user_id)
+        category = api_models.Category.objects.get(id=category_id)
+
+        api_models.Post.objects.create(
+            user=user,
+            title=title,
+            image=image,
+            description=description,
+            tags=tags,
+            category=category,
+            status=post_status
+        )
+
+        return Response({"message": "Post Created"}, status=status.HTTP_201_CREATED)

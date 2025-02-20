@@ -7,7 +7,7 @@ urlpatterns = [
     path('user/token/', api_views.MyTokenObtainPairView.as_view()),
     path('user/token/refresh/', TokenRefreshView.as_view()),
     path('user/register/', api_views.RegisterView.as_view()),
-    path('user/profile/<int:user_id>/', api_views.ProfileView.as_view()),
+    path('user/profile/<user_id>/', api_views.ProfileView.as_view()),
 
     # Post
     path('post/category/list/', api_views.CategoryListAPIView.as_view()),
@@ -18,7 +18,13 @@ urlpatterns = [
     path('post/comment-post/', api_views.PostCommentAPIView.as_view()),
     path('post/bookmark-post/', api_views.BookmarkPOstAPIView.as_view()),
 
-    path('author/dashboard/stas/<user_id>/', api_views.DashboardStats.as_view())
-
+    # Dashboard
+    path('author/dashboard/stas/<user_id>/', api_views.DashboardStats.as_view()),
+    path('author/dashboard/comment_list/<user_id>/', api_views.DashboardCommentList.as_view()),
+    path('author/dashboard/noti-list/<user_id>/', api_views.DashboardNotificationList.as_view()),
+    path('author/dashboard/noti-mark-seen/', api_views.DashboardMarkNotificationAsSeen.as_view()),
+    path('author/dashboard/reply-comment/', api_views.DashboardReplyCommentAPIView.as_view()),
+    path('author/dashboard/post-create/', api_views.DashboardPostCreateAPIView.as_view()),
+    
 
 ]
